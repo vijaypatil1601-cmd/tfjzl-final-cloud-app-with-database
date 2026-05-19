@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+
     {% load static %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
 <body>
 
 <nav class="navbar navbar-light bg-light">
+
     <div class="container-fluid">
 
         <div class="navbar-header">
+
             <a class="navbar-brand"
                href="{% url 'onlinecourse:index' %}">
                Home
             </a>
+
         </div>
 
         <ul class="nav navbar-nav navbar-right">
 
             {% if user.is_authenticated %}
+
             <li>
+
                 <a class="btn btn-link" href="#">
-                    {{ user.first_name }}({{ user.username }})
+                    {{ user.first_name }} ({{ user.username }})
                 </a>
 
                 <a class="btn btn-link"
                    href="{% url 'onlinecourse:logout' %}">
                    Logout
                 </a>
+
             </li>
 
             {% else %}
+
             <li>
 
                 <form class="form-inline"
@@ -64,27 +75,37 @@
                         </a>
 
                     </div>
+
                 </form>
 
             </li>
+
             {% endif %}
 
         </ul>
+
     </div>
+
 </nav>
 
 <div class="container-fluid">
 
-    {% if grade > 80 %}
+    {% if grade >= 80 %}
 
     <div class="alert alert-success">
-        Congratulations! You passed the exam with score {{ grade }}
+
+        Congratulations!
+        You passed the exam with score {{ grade }}
+
     </div>
 
     {% else %}
 
     <div class="alert alert-danger">
-        Sorry, you failed the exam with score {{ grade }}
+
+        Sorry!
+        You failed the exam with score {{ grade }}
+
     </div>
 
     <a class="btn btn-link text-danger"
@@ -94,28 +115,30 @@
 
     {% endif %}
 
-    <div class="card-columns-vertical mt-1">
+    <div class="card-columns-vertical mt-3">
 
-        <h5>Exam Results</h5>
+        <h4>Exam Results</h4>
 
         {% for choice in choices %}
 
-        <div class="card mt-1">
+        <div class="card mt-2">
 
             <div class="card-body">
 
                 <h6>Selected Choice:</h6>
 
-                {{ choice.content }}
+                <p>{{ choice.content }}</p>
 
                 {% if choice.is_correct %}
+
                 <span class="text-success">
-                    ✔ Correct
+                    ✔ Correct Answer
                 </span>
 
                 {% else %}
+
                 <span class="text-danger">
-                    ✘ Wrong
+                    ✘ Wrong Answer
                 </span>
 
                 {% endif %}
