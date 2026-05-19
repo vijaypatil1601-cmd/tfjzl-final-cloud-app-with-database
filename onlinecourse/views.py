@@ -1,22 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
 
 from .models import Course, Enrollment, Question, Choice, Submission
 
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import login, logout, authenticate
 
 import logging
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Create your views here.
 
-
+# User Registration
 def registration_request(request):
 
     context = {}
@@ -31,7 +28,6 @@ def registration_request(request):
 
     elif request.method == 'POST':
 
-        # Check if user exists
         username = request.POST['username']
         password = request.POST['psw']
         first_name = request.POST['firstname']
@@ -43,8 +39,8 @@ def registration_request(request):
             User.objects.get(username=username)
             user_exist = True
 
-        except:
-            logger.error("New user")
+        except User.DoesNotExist:
+            logger.info("New user")
 
         if not user_exist:
 
@@ -70,6 +66,7 @@ def registration_request(request):
             )
 
 
+# Login
 def login_request(request):
 
     context = {}
@@ -100,15 +97,14 @@ def login_request(request):
                 context
             )
 
-    else:
-
-        return render(
-            request,
-            'onlinecourse/user_login_bootstrap.html',
-            context
-        )
+    return render(
+        request,
+        'onlinecourse/user_login_bootstrap.html',
+        context
+    )
 
 
+# Logout
 def logout_request(request):
 
     logout(request)
@@ -116,13 +112,13 @@ def logout_request(request):
     return redirect('onlinecourse:index')
 
 
+# Check Enrollment
 def check_if_enrolled(user, course):
 
     is_enrolled = False
 
     if user.id is not None:
 
-        # Check if user enrolled
         num_results = Enrollment.objects.filter(
             user=user,
             course=course
@@ -134,7 +130,7 @@ def check_if_enrolled(user, course):
     return is_enrolled
 
 
-# CourseListView
+# Course List View
 class CourseListView(generic.ListView):
 
     template_name = 'onlinecourse/course_list_bootstrap.html'
@@ -151,11 +147,15 @@ class CourseListView(generic.ListView):
 
             if user.is_authenticated:
 
-                course.is_enrolled = check_if_enrolled(user, course)
+                course.is_enrolled = check_if_enrolled(
+                    user,
+                    course
+                )
 
         return courses
 
 
+# Course Detail View
 class CourseDetailView(generic.DetailView):
 
     model = Course
@@ -163,17 +163,23 @@ class CourseDetailView(generic.DetailView):
     template_name = 'onlinecourse/course_detail_bootstrap.html'
 
 
+# Enroll View
 def enroll(request, course_id):
 
-    course = get_object_or_404(Course, pk=course_id)
+    course = get_object_or_404(
+        Course,
+        pk=course_id
+    )
 
     user = request.user
 
-    is_enrolled = check_if_enrolled(user, course)
+    is_enrolled = check_if_enrolled(
+        user,
+        course
+    )
 
     if not is_enrolled and user.is_authenticated:
 
-        # Create an enrollment
         Enrollment.objects.create(
             user=user,
             course=course,
@@ -192,10 +198,13 @@ def enroll(request, course_id):
     )
 
 
-# Submit exam
+# Submit Exam
 def submit(request, course_id):
 
-    course = get_object_or_404(Course, pk=course_id)
+    course = get_object_or_404(
+        Course,
+        pk=course_id
+    )
 
     user = request.user
 
@@ -225,7 +234,7 @@ def submit(request, course_id):
     )
 
 
-# Collect selected answers
+# Extract Answers
 def extract_answers(request):
 
     submitted_answers = []
@@ -243,14 +252,19 @@ def extract_answers(request):
     return submitted_answers
 
 
-# Show exam result
+# Show Exam Result
 def show_exam_result(request, course_id, submission_id):
 
     context = {}
 
-    course = get_object_or_404(Course, pk=course_id)
+    course = get_object_or_404(
+        Course,
+        pk=course_id
+    )
 
-    submission = Submission.objects.get(id=submission_id)
+    submission = Submission.objects.get(
+        id=submission_id
+    )
 
     choices = submission.choices.all()
 
